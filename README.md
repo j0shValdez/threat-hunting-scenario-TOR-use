@@ -25,9 +25,9 @@ Management suspects that some employees may be using TOR browsers to bypass netw
 
 ### High-Level TOR-Related IoC Discovery Plan
 
-- **Check `DeviceFileEvents`** for any `tor(.exe)` or `firefox(.exe)` file events.
-- **Check `DeviceProcessEvents`** for any signs of installation or usage.
-- **Check `DeviceNetworkEvents`** for any signs of outgoing connections over known TOR ports.
+- **Checked `DeviceFileEvents`** for any `tor(.exe)` or `firefox(.exe)` file events.
+- **Checked `DeviceProcessEvents`** for any signs of installation or usage.
+- **Checked `DeviceNetworkEvents`** for any signs of outgoing connections over known TOR ports.
 
 ---
 
@@ -57,9 +57,6 @@ DeviceFileEvents
 
 ### 2. Searched the `DeviceProcessEvents` Table
 
-Searched for any `ProcessCommandLine` that contained the string "tor-browser-windows-x86_64-portable-14.0.1.exe". Based on the logs returned, at `2024-11-08T22:16:47.4484567Z`, an employee on the "threat-hunt-lab" device ran the file `tor-browser-windows-x86_64-portable-14.0.1.exe` from their Downloads folder, using a command that triggered a silent installation.
-
-
 Based on the first step, we know that user "`joshvlab`" downlaoded file `tor-browser-windows-x86_64-portable-14.5.1.exe`on machine "`jv-windows-targ`". But did they install it?
 To determine whether any Tor-related files were executed, I began by briefly inspecting the `DeviceProcessEvents`. 
 
@@ -82,7 +79,10 @@ DeviceProcessEvents
 
 ### 3. Searched the `DeviceProcessEvents` Table for TOR Browser Execution
 
-Searched for any indication that user "employee" actually opened the TOR browser. There was evidence that they did open it at `2024-11-08T22:17:21.6357935Z`. There were several other instances of `firefox.exe` (TOR) as well as `tor.exe` spawned afterwards.
+After confirming the installation of the Tor browser, the next step was to determine whether the user actually opened browser itself. During the investigation, I found that the file `firefox.exe` (Tor's browser executable) was located at `C:\Users\JoshVlab\Desktop\Tor Browser\Browser\firefox.exe`. 
+
+A query against the `DeviceProcessEvents` table revealed that user `joshvlab` opened the Tor browser at `2025-05-06T19:23:39.2017858Z`. Additional instances of `firefox.exe` and `tor.exe` execution followed, suggesting continued browser activity, likely via the installed Tor software.
+
 
 **Query used to locate events:**
 
@@ -93,7 +93,9 @@ DeviceProcessEvents
 | project Timestamp, DeviceName, AccountName, ActionType, FileName, FolderPath, SHA256, ProcessCommandLine  
 | order by Timestamp desc
 ```
-<img width="1212" alt="image" src="https://github.com/user-attachments/assets/b13707ae-8c2d-4081-a381-2b521d3a0d8f">
+  > The query scans the `DeviceProcessEvents` table to identify any executions of Tor-related executables by filtering for file names typically associated with Tor (`tor.exe`, `firefox.exe`, and `tor-browser.exe`). It then orders the results by time in descending order and selects relevant fields to display, such as the timestamp, user account, file path, and hash—helping confirm both usage and authenticity of the application.
+
+<img width="1212" alt="image" src="https://github.com/user-attachments/assets/1ff0b96e-0d31-4559-a0e6-8b0fbe91046a">
 
 ---
 
