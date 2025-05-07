@@ -7,7 +7,12 @@
 
 _**Project Overview**_:
 
-In this project.....
+In this threat hunting project, I investigated a simulated insider threat scenario where an employee attempted to bypass enterprise network controls using the Tor browser. To emulate realistic malicious behavior, I designed and executed a threat scenario in which a user silently installed the Tor browser, accessed the dark web, created a “shopping list” with illicit items, and attempted to cover their tracks.
+
+Using Microsoft Defender for Endpoint (MDE) and Kusto Query Language (KQL), I conducted a step-by-step investigation via to detect Indicators of Compromise (IoCs). The analysis revealed installation, execution, and network activity consistent with Tor browser usage. My investigation confirmed that the user silently installed tor-browser-windows-x86_64-portable-14.5.1.exe, launched firefox.exe, and made network connections to known Tor entry ports (e.g., 9001).
+
+This project demonstrates my ability to craft realistic threat scenarios, simulate attacker behavior, and perform advanced endpoint threat hunting using KQL and Microsoft Defender in a cloud lab environment.
+
 
 - [Scenario Creation](https://github.com/joshmadakor0/threat-hunting-scenario-tor/blob/main/threat-hunting-scenario-tor-event-creation.md)
 
