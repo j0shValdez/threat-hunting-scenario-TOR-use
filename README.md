@@ -101,20 +101,33 @@ DeviceProcessEvents
 
 ### 4. Searched the `DeviceNetworkEvents` Table for TOR Network Connections
 
-Searched for any indication the TOR browser was used to establish a connection using any of the known TOR ports. At `2024-11-08T22:18:01.1246358Z`, an employee on the "threat-hunt-lab" device successfully established a connection to the remote IP address `176.198.159.33` on port `9001`. The connection was initiated by the process `tor.exe`, located in the folder `c:\users\employee\desktop\tor browser\browser\torbrowser\tor\tor.exe`. There were a couple of other connections to sites over port `443`.
+The next phase of the investigation focused on verifying whether the Tor Browser was actually used to establish outbound network connections. Using the `DeviceNetworkEvents` table, I searched for activity involving ports commonly associated with Tor communications: `9001`, `9030`, `9040`, `9050`, `9051`, and `9150`. 
+
+The query revealed that at `2025-05-06T19:23:50.9490815Z`, the user account `joshvlab` on device `jv-windows-targ` made a network connection to IP address `116.203.17.238` over port `9001`. The connection was initiated by the process `tor.exe`, which was located in the expected installation path for the Tor Browser:
+`C:\Users\joshvlab\Desktop\Tor Browser\Browser\TorBrowser\Tor\tor.exe`. 
+
+This strongly suggests that the Tor Browser was actively used to browse the internet, most likely to anonymize network activity or access hidden services.
+
+
 
 **Query used to locate events:**
 
 ```kql
-DeviceNetworkEvents  
-| where DeviceName == "threat-hunt-lab"  
-| where InitiatingProcessAccountName != "system"  
-| where InitiatingProcessFileName in ("tor.exe", "firefox.exe")  
-| where RemotePort in ("9001", "9030", "9040", "9050", "9051", "9150", "80", "443")  
-| project Timestamp, DeviceName, InitiatingProcessAccountName, ActionType, RemoteIP, RemotePort, RemoteUrl, InitiatingProcessFileName, InitiatingProcessFolderPath  
+DeviceNetworkEvents
+| where DeviceName == "jv-windows-targ"
+| where InitiatingProcessAccountName == "joshvlab"
+| where RemotePort in ("9001","9030", "9040", "9050", "9051", "9150")
+| project Timestamp, DeviceName, InitiatingProcessAccountName, ActionType, RemoteIP, RemotePort, RemoteUrl, InitiatingProcessFileName, InitiatingProcessFolderPath
 | order by Timestamp desc
 ```
-<img width="1212" alt="image" src="https://github.com/user-attachments/assets/87a02b5b-7d12-4f53-9255-f5e750d0e3cb">
+  > This query examines the `DeviceNetworkEvents` table for any outbound connections initiated by the user `joshvlab` from the target system. It filters for known Tor-related ports and selects key fields including timestamp, IP address, port, and initiating process details. Sorting results by timestamp helps identify the timing and context of potential Tor usage.
+
+<img width="1212" alt="image" src="https://github.com/user-attachments/assets/09017825-0128-4fc2-87c4-78c4bf601be2">
+
+
+  > Below, you can observe multiple successful network connections made using other known Tor-related ports, further supporting evidence of Tor Browser activity
+
+<img width="1212" alt="image" src="https://github.com/user-attachments/assets/73cc3aa6-4f9b-4ede-a506-e796d6736f91">
 
 ---
 
