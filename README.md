@@ -73,7 +73,10 @@ DeviceProcessEvents
 | where ProcessCommandLine contains "tor-browser-windows-x86_64-portable-14.5.1.exe"
 | project Timestamp, DeviceName, AccountName, ActionType, FileName, FolderPath, SHA256, ProcessCommandLine
 ```
-<img width="1212" alt="image" src="https://github.com/user-attachments/assets/b07ac4b4-9cb3-4834-8fac-9f5f29709d78">
+  > The query filters the `DeviceProcessEvents` table to identify any process execution activity involving the Tor browser installer. It begins by narrowing the results to the target device (`jv-windows-targ`) and then searches for any command line executions that contain the specific installer filename (`tor-browser-windows-x86_64-portable-14.5.1.exe`). The `project` statement is used to display key fields such as the timestamp of execution, device name, user account, action type, file name, file path, file hash, and the full process command line—providing context around how the executable was run.
+
+
+<img width="1212" alt="image" src="https://github.com/user-attachments/assets/09b1849d-89c9-4637-b9e1-5ac0bda4ca86">
 
 ---
 
