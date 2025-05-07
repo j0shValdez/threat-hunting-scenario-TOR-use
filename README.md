@@ -35,20 +35,23 @@ Management suspects that some employees may be using TOR browsers to bypass netw
 
 ### 1. Searched the `DeviceFileEvents` Table
 
-Searched for any file that had the string "tor" in it and discovered what looks like the user "employee" downloaded a TOR installer, did something that resulted in many TOR-related files being copied to the desktop, and the creation of a file called `tor-shopping-list.txt` on the desktop at `2024-11-08T22:27:19.7259964Z`. These events began at `2024-11-08T22:14:48.6065231Z`.
+To begin my investigation, I performed a broad search across the **DeviceFileEvents** table for any file name containing the string **"tor"**. This helped me cast a wide net to identify any potentially suspicious activity related to the **Tor browser** or its installation. From this initial search, I noticed several file operations tied to the user "`joshvlab`" on the machine "`jv-windows-targ`", including the appearance of a file called "`tor-shopping-list.txt`" at `2025-05-06T19:35:56.8012213Z`, a file `tor-browser-windows-x86_64-portable-14.5.1.exe` located in the downlaods folder, and multiple Tor-related files being written to the Desktop . These findings suggested that Tor may have been installed and possibly used, which warranted further investigation into this user’s activity. The evetns began at `2025-05-06T19:12:56.287056Z`.
 
 **Query used to locate events:**
 
 ```kql
-DeviceFileEvents  
-| where DeviceName == "threat-hunt-lab"  
-| where InitiatingProcessAccountName == "employee"  
-| where FileName contains "tor"  
-| where Timestamp >= datetime(2024-11-08T22:14:48.6065231Z)  
-| order by Timestamp desc  
+DeviceFileEvents
+| where DeviceName == "jv-windows-targ"
+| where InitiatingProcessAccountName == "joshvlab"
+| where FileName startswith "tor"
+| where Timestamp >= datetime(2025-05-06T19:12:56.287056Z)
 | project Timestamp, DeviceName, ActionType, FileName, FolderPath, SHA256, Account = InitiatingProcessAccountName
 ```
-<img width="1212" alt="image" src="https://github.com/user-attachments/assets/71402e84-8767-44f8-908c-1805be31122d">
+ > `DeviceName` and `InitiatingProcessAccountName` were filtered to isolate actions by the specific user on the target system.`FileName startswith "tor"`
+> narrowed the focus to files directly related to Tor.`Timestamp` was used to ensure we only viewed activity from the start of the suspicious events
+> onward. The `project` statement selected relevant columns to highlight file operations, hash values, and user identity.
+
+<img width="1212" alt="image" src="https://github.com/user-attachments/assets/360c7a19-ee29-4f00-b5cc-125045a86451">
 
 ---
 
@@ -56,13 +59,18 @@ DeviceFileEvents
 
 Searched for any `ProcessCommandLine` that contained the string "tor-browser-windows-x86_64-portable-14.0.1.exe". Based on the logs returned, at `2024-11-08T22:16:47.4484567Z`, an employee on the "threat-hunt-lab" device ran the file `tor-browser-windows-x86_64-portable-14.0.1.exe` from their Downloads folder, using a command that triggered a silent installation.
 
+
+Based on the first step, we know that user "`joshvlab`" downlaoded file `tor-browser-windows-x86_64-portable-14.5.1.exe`on machine "`jv-windows-targ`". But did they install it?
+To determine whether any Tor-related files were executed, I began by briefly inspecting the `DeviceProcessEvents`. 
+
+Using a targeted KQL query, I searched for any instance where the `ProcessCommandLine` contained that specific filename. The results showed that at `2025-05-06T19:22:48.3035661Z`, the user account `joshvlab` on the target machine `jv-windows-targ` executed the file from their Downloads folder. The `ProccessCommandLine` included the parameter `/S` that indicated a **silent installation**, confirming the executable was run without user interface prompts.
+
 **Query used to locate event:**
 
 ```kql
-
-DeviceProcessEvents  
-| where DeviceName == "threat-hunt-lab"  
-| where ProcessCommandLine contains "tor-browser-windows-x86_64-portable-14.0.1.exe"  
+DeviceProcessEvents
+| where DeviceName == "jv-windows-targ"
+| where ProcessCommandLine contains "tor-browser-windows-x86_64-portable-14.5.1.exe"
 | project Timestamp, DeviceName, AccountName, ActionType, FileName, FolderPath, SHA256, ProcessCommandLine
 ```
 <img width="1212" alt="image" src="https://github.com/user-attachments/assets/b07ac4b4-9cb3-4834-8fac-9f5f29709d78">
