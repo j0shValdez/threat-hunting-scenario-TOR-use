@@ -14,7 +14,7 @@ Using Microsoft Defender for Endpoint (MDE) and Kusto Query Language (KQL), I co
 This project demonstrates my ability to craft realistic threat scenarios, simulate attacker behavior, and perform advanced endpoint threat hunting using KQL and Microsoft Defender in a cloud lab environment.
 
 
-- [Scenario Creation](https://github.com/joshmadakor0/threat-hunting-scenario-tor/blob/main/threat-hunting-scenario-tor-event-creation.md)
+- [Scenario Creation](https://github.com/j0shValdez/Tor-threat-hunt-Scenario/tree/main)
 
 
 
