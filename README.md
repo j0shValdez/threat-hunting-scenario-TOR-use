@@ -3,7 +3,7 @@
 </p>
 
 
-# Threat Hunt Report: Unauthorized TOR Usage (**IN PROGRESS**)
+# Threat Hunt Report: Unauthorized TOR Usage
 
 _**Project Overview**_:
 
